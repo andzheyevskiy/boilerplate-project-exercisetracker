@@ -11,13 +11,13 @@ const userSchema = new mongoose.Schema({
 userSchema.methods.toJson = function () {
     return {
         username: this.username,
-        _id: this.id
+        _id: this._id.toString()
     }
 }
 
 const exerciseSchema = new mongoose.Schema({
     username: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
@@ -41,7 +41,7 @@ exerciseSchema.methods.toJson = function () {
         description: this.description,
         duration: this.duration,
         date: this.date.toDateString(),
-        _id: this._id
+        _id: this._id.toString()
     }
 }
 
@@ -55,18 +55,18 @@ exerciseSchema.methods.toJsonMin = function () {
 
 const logSchema = new mongoose.Schema({
     username: {
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true
     },
     log: {
-        type: [Schema.Types.ObjectId],
+        type: [mongoose.Schema.Types.ObjectId],
         ref: "Exercise"
     }
 })
 
 logSchema.virtual("count").get(function () {
-    return this.log.length
+    return this.log.length()
 })
 logSchema.set('toJSON', { virtuals: true });
 logSchema.set('toObject', { virtuals: true });
@@ -92,8 +92,8 @@ logSchema.methods.toJson = function () {
 }
 
 let User = mongoose.model("User", userSchema)
-let Exercise = moongose.model("Exercise", exerciseSchema)
-let Log = moongose.model("Log", logSchema)
+let Exercise = mongoose.model("Exercise", exerciseSchema)
+let Log = mongoose.model("Log", logSchema)
 
 module.exports = {
     User,
