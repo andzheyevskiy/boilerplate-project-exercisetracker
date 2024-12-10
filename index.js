@@ -60,7 +60,7 @@ async function createUser(usernameStr) {
   return formated
 }
 
-async function postCreateUser(req, res) {
+async function post_CreateUser(req, res) {
   const user = req.body.username
   const doesExist = await findUserbyUsername(user)
   if (doesExist) {
@@ -76,7 +76,7 @@ async function postCreateUser(req, res) {
 app.use(express.urlencoded({ extended: false }))
 
 app.post("/api/users", async function (req, res) {
-  postCreateUser(req, res)
+  post_CreateUser(req, res)
 })
 
 
