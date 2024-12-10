@@ -14,6 +14,64 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
 
+/// FUNCTIONS
+
+async function validateItem(item) {
+  try {
+    await item.validate()
+  } catch (error) {
+    throw new customError(DBErrors.Validation, error)
+  }
+}
+
+async function findUserbyUsername(usernameStr) {
+  try {
+    const user = await User.findOne({ username: usernameStr })
+    return user
+  } catch (error) {
+    throw new customError(DBErrors.Find, error)
+  }
+}
+
+async function saveItem(item) {
+  try {
+    const response = await item.save()
+    return response
+  } catch (error) {
+    throw new customError(DBErrors.Save, error)
+  }
+}
+
+async function formatItem(item) {
+  try {
+    return item.toJson()
+  } catch (error) {
+    throw new customError(DBErrors.Format, error)
+  }
+}
+
+
+
+async function createUser(usernameStr) {
+  const newUser = new User({ username: usernameStr })
+  await validateItem(newUser)
+  const result = await saveItem(newUser)
+  const formated = formatItem(result)
+  return formated
+}
+
+async function postCreateUser(req, res) {
+  const user = req.body.username
+  const doesExist = await findUserbyUsername(user)
+  if (doesExist) {
+    const formated = formatItem(doesExist)
+    res.json(formated)
+  } else {
+    const newUser = await createUser(user)
+    res.json(newUser)
+  }
+}
+
 
 app.use(express.urlencoded({ extended: false }))
 
@@ -39,5 +97,8 @@ const listener = app.listen(process.env.PORT || 3000, () => {
 
 
 // User Reset
-/* User.deleteMany({}).then(e=>console.log("Deleted: ",e))
-User.find({}).then(e=>console.log("Found", e))  */
+// User.deleteMany({}).then(e=>console.log("Deleted: ",e))
+// User.find({}).then(e=>console.log("Found", e))  
+
+
+
