@@ -22,6 +22,11 @@ const DBErrors = {
         name: "DB: Find Error",
         message: "Failed to find item",
         code: 500
+    },
+    Format: {
+        name: "DB: Format Error",
+        message: "Failed to format item",
+        code: 500
     }
 }
 
