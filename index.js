@@ -20,7 +20,7 @@ async function validateItem(item) {
   try {
     await item.validate()
   } catch (error) {
-    throw new customError(DBErrors.Validation, error)
+    throw new customError(DBErrors.Validation, error.errors)
   }
 }
 
