@@ -42,6 +42,15 @@ async function findUserbyUsername(usernameStr) {
   }
 }
 
+async function findUserById(id) {
+  try {
+    const user = await User.findById(id)
+    return user
+  } catch (error) {
+    throw new customError(DBErrors.Find, error)
+  }
+}
+
 async function saveItem(item) {
   try {
     const response = await item.save()
@@ -94,6 +103,16 @@ async function get_allUsers(req, res) {
   res.json(formated)
 }
 
+async function post_CreateExercise(req, res) {
+  const exercise = await createExercise({
+    username: req.params._id,
+    description: req.body.description,
+    duration: req.body.duration,
+    date: req.body.date
+  })
+  res.json(exercise)
+}
+
 //=========== APP =============//
 
 app.use(express.urlencoded({ extended: false }))
@@ -116,7 +135,11 @@ app.get("/api/users", async function (req, res) {
   }
 })
 
+// Exercise //
 
+app.post("/api/users/:_id/exercises", async function (req, res) {
+  post_CreateExercise(req, res)
+})
 
 
 
