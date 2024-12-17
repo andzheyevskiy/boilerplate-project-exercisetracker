@@ -71,7 +71,7 @@ async function createUser(usernameStr) {
 
 async function createExercise(data) {
   const newExercise = new Exercise(data)
-  const savedItem = saveItem(newExercise)
+  const savedItem = await saveItem(newExercise)
   const formated = formatItem(savedItem)
   return formated
 }
