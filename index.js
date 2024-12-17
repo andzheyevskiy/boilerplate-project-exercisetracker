@@ -94,11 +94,19 @@ app.use(express.urlencoded({ extended: false }))
 // Users //
 
 app.post("/api/users", async function (req, res) {
-  post_CreateUser(req, res)
+  try {
+    await post_CreateUser(req, res)
+  } catch (error) {
+    next(error)
+  }
 })
 
 app.get("/api/users", async function (req, res) {
-  get_allUsers(req, res)
+  try {
+    get_allUsers(req, res)
+  } catch (error) {
+    next(error)
+  }
 })
 
 
