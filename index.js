@@ -24,6 +24,15 @@ async function validateItem(item) {
   }
 }
 
+async function findUsers(query = {}) {
+  try {
+    const user = await User.find(query)
+    return user
+  } catch (error) {
+    throw new customError(DBErrors.Find, error)
+  }
+}
+
 async function findUserbyUsername(usernameStr) {
   try {
     const user = await User.findOne({ username: usernameStr })
@@ -72,12 +81,27 @@ async function post_CreateUser(req, res) {
   }
 }
 
+async function get_allUsers(req, res) {
+  const allUsers = await findUsers()
+  const formated = allUsers.map(e => e.toJson())
+  res.json(formated)
+}
+
+//=========== APP =============//
 
 app.use(express.urlencoded({ extended: false }))
+
+// Users //
 
 app.post("/api/users", async function (req, res) {
   post_CreateUser(req, res)
 })
+
+app.get("/api/users", async function (req, res) {
+  get_allUsers(req, res)
+})
+
+
 
 
 
