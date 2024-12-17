@@ -69,11 +69,18 @@ async function createUser(usernameStr) {
   return formated
 }
 
+async function createExercise(data) {
+  const newExercise = new Exercise(data)
+  const savedItem = saveItem(newExercise)
+  const formated = formatItem(savedItem)
+  return formated
+}
+
 async function post_CreateUser(req, res) {
   const user = req.body.username
   const doesExist = await findUserbyUsername(user)
   if (doesExist) {
-    const formated = formatItem(doesExist)
+    const formated = await formatItem(doesExist)
     res.json(formated)
   } else {
     const newUser = await createUser(user)
