@@ -37,11 +37,11 @@ const exerciseSchema = new mongoose.Schema({
 
 exerciseSchema.methods.toJson = function () {
     return {
+        _id: this.username._id,
         username: this.username.username,
-        description: this.description,
-        duration: this.duration,
         date: this.date.toDateString(),
-        _id: this._id.toString()
+        duration: this.duration,
+        description: this.description
     }
 }
 
@@ -71,16 +71,27 @@ logSchema.virtual("count").get(function () {
 logSchema.set('toJSON', { virtuals: true });
 logSchema.set('toObject', { virtuals: true });
 
-const populate = function (next) {
-    this.populate("username")
-    this.populate("log")
+const populateExercisePre = async function (next) {
+    await this.populate("username")
     next()
 }
 
-exerciseSchema.pre("find", populate)
-exerciseSchema.pre("findOne", populate)
-logSchema.pre("find", populate)
-logSchema.pre("findOne", populate)
+const populateExercisePost = async function(doc, next){
+    await doc.populate("username")
+    next()
+}
+
+const populateLogPre = async function (next) {
+    await this.populate("username")
+    await this.populate("log")
+    next()
+}
+
+exerciseSchema.pre("find", populateExercisePre)
+exerciseSchema.pre("findOne", populateExercisePre)
+exerciseSchema.post("save", populateExercisePost)
+logSchema.pre("find", populateLogPre)
+logSchema.pre("findOne", populateLogPre)
 
 logSchema.methods.toJson = function () {
     return {

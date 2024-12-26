@@ -68,8 +68,6 @@ async function formatItem(item) {
   }
 }
 
-
-
 async function createUser(usernameStr) {
   const newUser = new User({ username: usernameStr })
   await validateItem(newUser)
@@ -80,6 +78,7 @@ async function createUser(usernameStr) {
 
 async function createExercise(data) {
   const newExercise = new Exercise(data)
+  await validateItem(newExercise)
   const savedItem = await saveItem(newExercise)
   const formated = formatItem(savedItem)
   return formated
@@ -108,7 +107,7 @@ async function post_CreateExercise(req, res) {
     username: req.params._id,
     description: req.body.description,
     duration: req.body.duration,
-    date: req.body.date
+    date: req.body.date || Date.now()
   })
   res.json(exercise)
 }
@@ -129,7 +128,7 @@ app.post("/api/users", async function (req, res) {
 
 app.get("/api/users", async function (req, res) {
   try {
-    get_allUsers(req, res)
+    await get_allUsers(req, res)
   } catch (error) {
     next(error)
   }
@@ -137,14 +136,19 @@ app.get("/api/users", async function (req, res) {
 
 // Exercise //
 
-app.post("/api/users/:_id/exercises", async function (req, res) {
-  post_CreateExercise(req, res)
+app.post("/api/users/:_id/exercises", async function (req, res, next) {
+  try {
+    await post_CreateExercise(req, res)
+  } catch (error) {
+    next(error)
+  }
 })
 
 
 
 // Error handling middleware
 app.use(function (err, req, res, next) {
+  console.error(err)
   res.status(err.code || 500).json({
     error: {
       code: err.code,
