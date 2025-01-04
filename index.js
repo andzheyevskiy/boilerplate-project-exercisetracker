@@ -5,6 +5,7 @@ require('dotenv').config()
 const mongoose = require("mongoose")
 const { Exercise, Log, User } = require('./Schemas')
 const { customError, DBErrors } = require('./Errors')
+const { param } = require('express/lib/request')
 
 mongoose.connect(process.env.MONGO_URI)
 
@@ -107,6 +108,21 @@ async function appendLogToUser(log) {
   }
 }
 
+function handleLogQuery(obj, params) {
+  let result = { ...obj }
+  if (params.from) {
+    result.log = result.log.filter(e => new Date(e.date) > new Date(params.from))
+  }
+  if (params.to) {
+    result.log = result.log.filter(e => new Date(e.date) < new Date(params.to))
+  }
+  if (params.limit) {
+    result.log = result.log.slice(0, params.limit)
+  }
+
+  return result
+}
+
 async function getUserLogs(userId, params) {
   try {
     const allLogs = await Log.findOne({ username: userId })
@@ -149,7 +165,9 @@ async function get_Logs(req, res) {
   const id = req.params._id
   const result = await getUserLogs(id)
   const formated = await formatItem(result)
-  res.json(formated)
+  const { from, to, limit } = req.query
+  const queried = handleLogQuery(formated, { from: from, to: to, limit: limit })
+  res.json(queried)
 }
 
 //=========== APP =============//
