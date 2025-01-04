@@ -72,7 +72,8 @@ async function createUser(usernameStr) {
   const newUser = new User({ username: usernameStr })
   await validateItem(newUser)
   const result = await saveItem(newUser)
-  const formated = formatItem(result)
+  const formated = await formatItem(result)
+  await addUserTolog(result)
   return formated
 }
 
@@ -80,8 +81,40 @@ async function createExercise(data) {
   const newExercise = new Exercise(data)
   await validateItem(newExercise)
   const savedItem = await saveItem(newExercise)
-  const formated = formatItem(savedItem)
+  await appendLogToUser(savedItem)
+  const formated = await formatItem(savedItem)
   return formated
+}
+
+async function addUserTolog(userObj) {
+  const newLog = new Log({ username: userObj._id })
+  try {
+    await newLog.save()
+  } catch (error) {
+    throw new customError(DBErrors.Save, error)
+  }
+}
+
+async function appendLogToUser(log) {
+  try {
+    const addLog = await Log.findOneAndUpdate(
+      { username: log.username },
+      { $push: { log: log } },
+      { new: true, upsert: true }
+    )
+  } catch (error) {
+    throw new customError(DBErrors.Find, error)
+  }
+}
+
+async function getUserLogs(userId, params) {
+  try {
+    const allLogs = await Log.findOne({ username: userId })
+    return allLogs
+
+  } catch (error) {
+    throw new customError(DBErrors.Find, error)
+  }
 }
 
 async function post_CreateUser(req, res) {
@@ -112,6 +145,13 @@ async function post_CreateExercise(req, res) {
   res.json(exercise)
 }
 
+async function get_Logs(req, res) {
+  const id = req.params._id
+  const result = await getUserLogs(id)
+  const formated = await formatItem(result)
+  res.json(formated)
+}
+
 //=========== APP =============//
 
 app.use(express.urlencoded({ extended: false }))
@@ -139,6 +179,16 @@ app.get("/api/users", async function (req, res) {
 app.post("/api/users/:_id/exercises", async function (req, res, next) {
   try {
     await post_CreateExercise(req, res)
+  } catch (error) {
+    next(error)
+  }
+})
+
+// Logs //
+
+app.get("/api/users/:_id/logs", async function (req, res, next) {
+  try {
+    await get_Logs(req, res)
   } catch (error) {
     next(error)
   }

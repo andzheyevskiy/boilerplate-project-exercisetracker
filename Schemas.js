@@ -61,18 +61,30 @@ const logSchema = new mongoose.Schema({
     },
     log: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref: "Exercise"
+        ref: "Exercise",
+        default: []
     }
 })
 
 logSchema.virtual("count").get(function () {
-    return this.log.length()
+    return this.log.length
 })
 logSchema.set('toJSON', { virtuals: true });
 logSchema.set('toObject', { virtuals: true });
 
-const populateExercisePre = async function (next) {
-    await this.populate("username")
+logSchema.methods.toJson = function (){
+    return {
+        username: this.username.username,
+        count: this.count,
+        _id: this._id,
+        log: this.log.map(e=>e.toJsonMin)
+    }
+}
+
+
+
+const populateExercisePre = function (next) {
+    this.populate("username")
     next()
 }
 
@@ -81,9 +93,8 @@ const populateExercisePost = async function(doc, next){
     next()
 }
 
-const populateLogPre = async function (next) {
-    await this.populate("username")
-    await this.populate("log")
+const populateLogPre = function (next) {
+    this.populate("username").populate("log")
     next()
 }
 
@@ -97,7 +108,7 @@ logSchema.methods.toJson = function () {
     return {
         username: this.username.username,
         count: this.count,
-        _id: this._id,
+        _id: this.username._id,
         log: this.log.map(e => e.toJsonMin())
     }
 }
